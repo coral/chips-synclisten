@@ -8,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/coral/chips-synclisten/messages"
 )
 
 type ChipsAPI struct {
@@ -36,17 +38,17 @@ func (c *ChipsAPI) LoadCompo(compo int) error {
 
 }
 
-func (c *ChipsAPI) DownloadCompo(status chan string) error {
+func (c *ChipsAPI) DownloadCompo(status chan messages.RPCResponse) error {
 	var p string = "tmp/compos/" + strconv.Itoa(c.CompoData.Compo.ID)
 	os.MkdirAll(p, 0777)
 
 	for _, compo := range c.CompoData.Entries {
 
 		if compo.Type == "song" {
-			status <- "Downloading " + compo.Title
+			status <- messages.RPCResponse{Message: "Downloading", Data: compo.Title}
 			err := c.downloadHelper(p, compo)
 			if err != nil {
-				status <- err.Error()
+				status <- messages.RPCResponse{Message: "Error", Data: err.Error()}
 				fmt.Println(err)
 				return err
 			}
@@ -54,7 +56,13 @@ func (c *ChipsAPI) DownloadCompo(status chan string) error {
 
 	}
 
+	status <- messages.RPCResponse{Message: "Done", Data: "Download"}
+
 	return nil
+}
+
+func (c *ChipsAPI) GetLoadedCompo() CompoResponse {
+	return c.CompoData
 }
 
 func (c *ChipsAPI) downloadHelper(path string, e Entry) error {

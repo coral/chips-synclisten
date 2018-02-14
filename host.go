@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/coral/chips-synclisten/chips"
 	"github.com/coral/chips-synclisten/functions"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,8 @@ func main() {
 
 	r := gin.Default()
 	m := melody.New()
+	compo := chips.ChipsAPI{}
+
 	r.Use(static.Serve("/tmp/", static.LocalFile("tmp", true)))
 	r.Use(static.Serve("/", static.LocalFile("static", true)))
 
@@ -19,7 +22,7 @@ func main() {
 	})
 
 	rpc := functions.RPC{}
-	rpc.Bind(m)
+	rpc.Bind(m, &compo)
 
 	r.Run(":4020")
 

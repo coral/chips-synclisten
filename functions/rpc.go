@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/coral/chips-synclisten/chips"
+	"github.com/coral/chips-synclisten/messages"
 	"github.com/olahol/melody"
 )
 
@@ -15,19 +16,16 @@ type RemoteCall struct {
 	Message  string `json:"message"`
 }
 
-type Response struct {
-	Message string
-	Data    string
-}
-
 type RPC struct {
 	m      *melody.Melody
-	status chan string
+	status chan messages.RPCResponse
+	compo  *chips.ChipsAPI
 }
 
-func (r *RPC) Bind(m *melody.Melody) {
+func (r *RPC) Bind(m *melody.Melody, newCompo *chips.ChipsAPI) {
 	r.m = m
-	r.status = make(chan string, 100)
+	r.compo = newCompo
+	r.status = make(chan messages.RPCResponse, 100)
 	go r.broadcast()
 	m.HandleMessage(r.HandleRemoteCall)
 
@@ -38,7 +36,8 @@ func (r *RPC) broadcast() {
 	for {
 		message := <-r.status
 		fmt.Println(message)
-		r.m.Broadcast([]byte(message))
+		jsresp, _ := json.Marshal(message)
+		r.m.Broadcast(jsresp)
 	}
 }
 
@@ -52,6 +51,12 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 
 	//REWRITE THIS SHIT ASAP LOOOOOOOOOOOOOOOOOOOOOOOOOL
 
+	if strings.ToLower(call.Function) == "get" {
+		componumber, _ := strconv.Atoi(call.Message)
+		fmt.Println("Downloading compo: ", componumber)
+		r.GetLoadedCompo(componumber)
+	}
+
 	if strings.ToLower(call.Function) == "download" {
 		componumber, _ := strconv.Atoi(call.Message)
 		fmt.Println("Downloading compo: ", componumber)
@@ -63,15 +68,24 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 		r.m.Broadcast([]byte("PONG"))
 	}
 
+	if strings.ToLower(call.Function) == "start" {
+		r.status <- messages.RPCResponse{Message: "Start", Data: call.Message}
+	}
+
 }
 
-func (r *RPC) DownloadCompo(c int, status chan string) {
+func (r *RPC) DownloadCompo(c int, status chan messages.RPCResponse) {
 
-	compo := chips.ChipsAPI{}
-
-	compo.LoadCompo(c)
-	err := compo.DownloadCompo(status)
+	r.compo.LoadCompo(c)
+	err := r.compo.DownloadCompo(status)
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func (r *RPC) GetLoadedCompo(c int) {
+	r.compo.LoadCompo(c)
+	loadedCompo := r.compo.GetLoadedCompo()
+	jsonCompo, _ := json.Marshal(loadedCompo)
+	r.status <- messages.RPCResponse{Message: "Compodata", Data: string(jsonCompo)}
 }
