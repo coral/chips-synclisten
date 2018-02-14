@@ -1,8 +1,9 @@
-package rpc
+package functions
 
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/coral/chips-synclisten/chips"
@@ -14,7 +15,17 @@ type RemoteCall struct {
 	Message  string `json:"message"`
 }
 
-func HandleRemoteCall(s *melody.Session, msg []byte) {
+type RPC struct {
+	m *melody.Melody
+}
+
+func (r *RPC) Bind(m *melody.Melody) {
+	r.m = m
+
+	m.HandleMessage(r.HandleRemoteCall)
+}
+
+func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 	call := RemoteCall{}
 	err := json.Unmarshal(msg, &call)
 	if err != nil {
@@ -22,14 +33,20 @@ func HandleRemoteCall(s *melody.Session, msg []byte) {
 		return
 	}
 
-	if strings.ToLower(call.Function) == "download" {
+	//REWRITE THIS SHIT ASAP LOOOOOOOOOOOOOOOOOOOOOOOOOL
 
-		DownloadCompo(43)
+	if strings.ToLower(call.Function) == "download" {
+		componumber, _ := strconv.Atoi(call.Message)
+		DownloadCompo(componumber)
+	}
+
+	if strings.ToLower(call.Function) == "ping" {
+		r.m.Broadcast([]byte("PONG"))
 	}
 
 }
 
-func DownloadCompo(c int) {
+func (r *RPC) downloadCompo(c int) {
 
 	compo := chips.ChipsAPI{}
 

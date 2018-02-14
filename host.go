@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/coral/chips-synclisten/rpc"
+	"github.com/coral/chips-synclisten/functions"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 	"github.com/olahol/melody"
@@ -18,7 +18,8 @@ func main() {
 		m.HandleRequest(c.Writer, c.Request)
 	})
 
-	m.HandleMessage(rpc.HandleRemoteCall)
+	rpc := functions.RPC{}
+	rpc.Bind(m)
 
 	r.Run(":4020")
 
