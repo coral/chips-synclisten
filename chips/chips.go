@@ -8,7 +8,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 )
 
 type ChipsAPI struct {
@@ -37,7 +36,7 @@ func (c *ChipsAPI) LoadCompo(compo int) error {
 
 }
 
-func (c *ChipsAPI) DownloadCompo(wg *sync.WaitGroup) error {
+func (c *ChipsAPI) DownloadCompo() error {
 	var p string = "tmp/compos/" + strconv.Itoa(c.CompoData.Compo.ID)
 	os.MkdirAll(p, 0777)
 
@@ -47,12 +46,11 @@ func (c *ChipsAPI) DownloadCompo(wg *sync.WaitGroup) error {
 			err := c.downloadHelper(p, compo)
 			if err != nil {
 				fmt.Println(err)
+				return err
 			}
 		}
 
 	}
-
-	wg.Done()
 
 	return nil
 }
