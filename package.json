@@ -1,0 +1,25 @@
+{
+  "name": "chips-synclisten",
+  "version": "0.0.1",
+  "description": "this is a neat thing for listening to CHIPS",
+  "main": "host.go",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coral/chips-synclisten.git"
+  },
+  "keywords": [
+    "lul"
+  ],
+  "author": "coral",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/coral/chips-synclisten/issues"
+  },
+  "homepage": "https://github.com/coral/chips-synclisten#readme",
+  "devDependencies": {
+    "webpack": "^3.11.0"
+  }
+}
