@@ -15,14 +15,31 @@ type RemoteCall struct {
 	Message  string `json:"message"`
 }
 
+type Response struct {
+	Message string
+	Data    string
+}
+
 type RPC struct {
-	m *melody.Melody
+	m      *melody.Melody
+	status chan string
 }
 
 func (r *RPC) Bind(m *melody.Melody) {
 	r.m = m
-
+	r.status = make(chan string, 100)
+	go r.broadcast()
 	m.HandleMessage(r.HandleRemoteCall)
+
+}
+
+//Basically just a BROADCAST TO WEBSOCKET CHANNEL
+func (r *RPC) broadcast() {
+	for {
+		message := <-r.status
+		fmt.Println(message)
+		r.m.Broadcast([]byte(message))
+	}
 }
 
 func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
@@ -37,21 +54,23 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 
 	if strings.ToLower(call.Function) == "download" {
 		componumber, _ := strconv.Atoi(call.Message)
-		DownloadCompo(componumber)
+		fmt.Println("Downloading compo: ", componumber)
+		r.DownloadCompo(componumber, r.status)
 	}
 
 	if strings.ToLower(call.Function) == "ping" {
+		fmt.Println("PING PONG")
 		r.m.Broadcast([]byte("PONG"))
 	}
 
 }
 
-func (r *RPC) downloadCompo(c int) {
+func (r *RPC) DownloadCompo(c int, status chan string) {
 
 	compo := chips.ChipsAPI{}
 
 	compo.LoadCompo(c)
-	err := compo.DownloadCompo()
+	err := compo.DownloadCompo(status)
 	if err != nil {
 		fmt.Println(err)
 	}

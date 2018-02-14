@@ -36,15 +36,17 @@ func (c *ChipsAPI) LoadCompo(compo int) error {
 
 }
 
-func (c *ChipsAPI) DownloadCompo() error {
+func (c *ChipsAPI) DownloadCompo(status chan string) error {
 	var p string = "tmp/compos/" + strconv.Itoa(c.CompoData.Compo.ID)
 	os.MkdirAll(p, 0777)
 
 	for _, compo := range c.CompoData.Entries {
 
 		if compo.Type == "song" {
+			status <- "Downloading " + compo.Title
 			err := c.downloadHelper(p, compo)
 			if err != nil {
+				status <- err.Error()
 				fmt.Println(err)
 				return err
 			}
@@ -56,8 +58,6 @@ func (c *ChipsAPI) DownloadCompo() error {
 }
 
 func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
-
-	fmt.Println("Downloading: " + e.Title)
 
 	tokens := strings.Split(e.UploadedURL, "/")
 	fileName := tokens[len(tokens)-1]
