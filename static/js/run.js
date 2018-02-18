@@ -35,9 +35,10 @@ function draw() {
                 var h = -height + map(spectrum[i], 0, 255, height, 0);
                 rect(x*2.5, height, (width / numBars)*2.5, h);
             }
+
+
         }
     }
 }
 
-sendMessage(JSON.stringify({"function":"fetch", "message":"43"}));
 
