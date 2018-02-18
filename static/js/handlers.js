@@ -66,7 +66,6 @@ function playSong() {
         $('#entry-description').text(playlist[0].description);
         console.log(song);
         song.play();
-        song.setVolume(0.05);
         
         playlist.shift();
         song.onended(function(){
