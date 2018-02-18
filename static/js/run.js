@@ -9,6 +9,7 @@ var numBars = 256;
 
 function setup() {
     canvas = createCanvas(1280,720);
+    canvas.class("bgrender")
     fft = new p5.FFT();
     fft.waveform(numBars);
     fft.smooth(0.85);
@@ -32,7 +33,7 @@ function draw() {
             for(var i = 0; i < numBars; i++) {
                 var x = map(i, 0, numBars, 0, width);
                 var h = -height + map(spectrum[i], 0, 255, height, 0);
-                rect(x*2, height, (width / numBars)*2, h);
+                rect(x*2.5, height, (width / numBars)*2.5, h);
             }
         }
     }

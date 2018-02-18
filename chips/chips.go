@@ -18,7 +18,8 @@ type ChipsAPI struct {
 
 func (c *ChipsAPI) LoadCompo(compo int) error {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://chipscompo.com/api/compo/"+strconv.Itoa(compo), nil)
+	//req, err := http.NewRequest("GET", "https://chipscompo.com/api/compo/"+strconv.Itoa(compo), nil)
+	req, err := http.NewRequest("GET", "http://127.0.0.1:8080/46.json", nil)
 	response, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Something went wrong with the request to Chips")
