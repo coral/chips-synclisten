@@ -1,5 +1,7 @@
 
 var playlist = [];
+var totalLength;
+var songNumber = 1;
 var fileBucket = '';
 var song;
 
@@ -25,6 +27,7 @@ function startCompo(c) {
         }
     });
     playlist = _.shuffle(playlist);
+    totalLength = playlist.length;
 
 
 
@@ -62,12 +65,15 @@ function playSong() {
 
 
     song = loadSound(fileBucket + filename, function(song){
+        
         $('#entry-title').text(playlist[0].title);
         $('#entry-description').text(playlist[0].description);
+        tickSong();
         console.log(song);
+
         song.play();
-        
         playlist.shift();
+
         song.onended(function(){
             setTimeout(function(){
                 playSong();
@@ -93,4 +99,9 @@ function endCompo() {
         duration: 1000,
         easing: 'linear'
     })
+}
+
+function tickSong() {
+     $('#entry-counter').text(songNumber + "/" + totalLength)
+     songNumber++;
 }

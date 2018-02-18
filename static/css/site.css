@@ -88,6 +88,17 @@ body {
     overflow: hidden;
 }
 
+.entry-counter {
+    position: absolute;
+    top: 10px;
+    left: 985px;
+    width: 100px;
+    height: 100px;
+    font-size: 16px;
+    text-align: right;
+    overflow: hidden;
+}
+
 
 .progress {
     position: absolute;
