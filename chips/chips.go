@@ -71,6 +71,11 @@ func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
 	tokens := strings.Split(e.UploadedURL, "/")
 	fileName := tokens[len(tokens)-1]
 
+	//Check if file is already cached
+	if _, err := os.Stat(path + "/" + fileName); err == nil {
+		return nil
+	}
+
 	//Create File
 	output, err := os.Create(path + "/" + fileName)
 	if err != nil {
