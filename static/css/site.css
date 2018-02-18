@@ -9,6 +9,13 @@ body {
     overflow: hidden;
 }
 
+.compo-title {
+    position: absolute;
+    font-size: 72px;
+    left: 90px;
+    top: 140px;
+}
+
 .entry-container {
     opacity: 1;
 }

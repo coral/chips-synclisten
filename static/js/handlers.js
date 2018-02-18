@@ -30,7 +30,6 @@ function playSong() {
         $('#entry-description').text(playlist[0].description);
 
         console.log(song);
-        song.setVolume(0.05);
         song.play();
         
         playlist.shift();
