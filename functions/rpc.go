@@ -51,9 +51,15 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 
 	//REWRITE THIS SHIT ASAP LOOOOOOOOOOOOOOOOOOOOOOOOOL
 
+	if strings.ToLower(call.Function) == "fetch" {
+		componumber, _ := strconv.Atoi(call.Message)
+		fmt.Println("Fetching compo: ", componumber)
+		r.FetchCompo(componumber)
+	}
+
 	if strings.ToLower(call.Function) == "get" {
 		componumber, _ := strconv.Atoi(call.Message)
-		fmt.Println("Downloading compo: ", componumber)
+		fmt.Println("Returning loaded compo: ", componumber)
 		r.GetLoadedCompo(componumber)
 	}
 
@@ -65,13 +71,23 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 
 	if strings.ToLower(call.Function) == "ping" {
 		fmt.Println("PING PONG")
-		r.m.Broadcast([]byte("PONG"))
+		r.status <- messages.RPCResponse{Message: "Pong", Data: "PINGPONG"}
 	}
 
 	if strings.ToLower(call.Function) == "start" {
-		r.status <- messages.RPCResponse{Message: "Start", Data: call.Message}
+		r.StartCompo()
 	}
 
+}
+
+func (r *RPC) FetchCompo(c int) {
+	compo := chips.ChipsAPI{}
+	err := compo.LoadCompo(c)
+	if err != nil {
+		fmt.Println(err)
+	}
+	jsonCompo, _ := json.Marshal(compo.GetLoadedCompo())
+	r.status <- messages.RPCResponse{Message: "Compodata", Data: string(jsonCompo)}
 }
 
 func (r *RPC) DownloadCompo(c int, status chan messages.RPCResponse) {
@@ -88,4 +104,10 @@ func (r *RPC) GetLoadedCompo(c int) {
 	loadedCompo := r.compo.GetLoadedCompo()
 	jsonCompo, _ := json.Marshal(loadedCompo)
 	r.status <- messages.RPCResponse{Message: "Compodata", Data: string(jsonCompo)}
+}
+
+func (r *RPC) StartCompo() {
+	loadedCompo := r.compo.GetLoadedCompo()
+	jsonCompo, _ := json.Marshal(loadedCompo)
+	r.status <- messages.RPCResponse{Message: "Start", Data: string(jsonCompo)}
 }
