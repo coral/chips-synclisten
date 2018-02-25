@@ -7,6 +7,7 @@ var canvas;
 var fft;
 var numBars = 256;
 
+
 function setup() {
     canvas = createCanvas(1280,720);
     canvas.class("bgrender")
@@ -26,10 +27,10 @@ function draw() {
         }
 
         if(typeof fft != "undefined") {
-            background("#cbcbcb");
+            background(colorBg);
             var spectrum = fft.analyze();
             noStroke();
-            fill("rgb(64, 64, 64)");
+            fill(colorDarkVibrant);
             for(var i = 0; i < numBars; i++) {
                 var x = map(i, 0, numBars, 0, width);
                 var h = -height + map(spectrum[i], 0, 255, height, 0);

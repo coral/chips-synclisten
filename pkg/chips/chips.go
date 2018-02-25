@@ -50,7 +50,7 @@ func (c *ChipsAPI) DownloadCompo(status chan messages.RPCResponse) error {
 
 		if compo.Type == "song" {
 			status <- messages.RPCResponse{Message: "Downloading", Data: compo.Title}
-			err := c.downloadHelper(p, compo)
+			err := c.songDownloadHelper(p, compo)
 			if err != nil {
 				status <- messages.RPCResponse{Message: "Error", Data: err.Error()}
 				fmt.Println(err)
@@ -58,6 +58,17 @@ func (c *ChipsAPI) DownloadCompo(status chan messages.RPCResponse) error {
 			}
 		}
 
+	}
+
+	for _, image := range c.CompoData.Images {
+
+		status <- messages.RPCResponse{Message: "Downloading", Data: "image"}
+		err := c.imageDownloadHelper(p, image.URL)
+		if err != nil {
+			status <- messages.RPCResponse{Message: "Error", Data: err.Error()}
+			fmt.Println(err)
+			return err
+		}
 	}
 
 	status <- messages.RPCResponse{Message: "Done", Data: "Download"}
@@ -73,7 +84,7 @@ func (c *ChipsAPI) GetLoadedCompo() GeneratedCompo {
 	return k
 }
 
-func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
+func (c *ChipsAPI) songDownloadHelper(path string, e Entry) error {
 
 	tokens := strings.Split(e.UploadedURL, "/")
 	fileName := tokens[len(tokens)-1]
@@ -104,6 +115,41 @@ func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
 	_, err = io.Copy(output, response.Body)
 	if err != nil {
 		return fmt.Errorf("Error while downloading", e.UploadedURL, "-", err)
+	}
+
+	return nil
+}
+
+func (c *ChipsAPI) imageDownloadHelper(path string, image string) error {
+	tokens := strings.Split(image, "/")
+	fileName := tokens[len(tokens)-1]
+
+	//Check if file is already cached
+	if _, err := os.Stat(path + "/" + fileName); err == nil {
+		return nil
+	}
+
+	//Create File
+	output, err := os.Create(path + "/" + fileName)
+	if err != nil {
+		fmt.Println("Error while creating", image, fileName, "-", err)
+		return fmt.Errorf("Error while creating", image, fileName, "-", err)
+
+	}
+	defer output.Close()
+
+	//Download the compo file
+	response, err := http.Get(image)
+	if err != nil {
+		return fmt.Errorf("Error while downloading", image, "-", err)
+
+	}
+	defer response.Body.Close()
+
+	//Write to file
+	_, err = io.Copy(output, response.Body)
+	if err != nil {
+		return fmt.Errorf("Error while downloading", image, "-", err)
 	}
 
 	return nil
@@ -164,9 +210,5 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 	shuffle.Slice(c.FilteredCompo.Songs)
 	shuffle.Slice(c.FilteredCompo.Art)
 	shuffle.Slice(c.FilteredCompo.Memes)
-
-	for _, t := range c.FilteredCompo.Songs {
-		fmt.Println(t.Title)
-	}
 
 }
