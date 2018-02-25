@@ -79,7 +79,6 @@ function playSong() {
     
             song.play();
             playlist.shift();
-            song.setVolume(0.05);
     
             song.onended(function(){
                 playSong();
