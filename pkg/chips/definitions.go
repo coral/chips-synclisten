@@ -96,3 +96,14 @@ type Category struct {
 	Category9 string `json:"category_9"`
 	Type      string `json:"type"`
 }
+
+type FilteredCompo struct {
+	Songs []Entry `json:"songs"`
+	Art   []Entry `json:"art"`
+	Memes []Entry `json:"memes"`
+}
+
+type GeneratedCompo struct {
+	CompoResponse CompoResponse `json:"cdata"`
+	FilteredCompo FilteredCompo `json:"cgen"`
+}

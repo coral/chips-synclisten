@@ -26,6 +26,11 @@ func main() {
 		c.String(200, e)
 	})
 
+	r.GET("/generatedcompo", func(c *gin.Context) {
+		e := compo.GetLoadedCompo()
+		c.JSON(200, e)
+	})
+
 	rpc := functions.RPC{}
 	rpc.Bind(m, &compo)
 

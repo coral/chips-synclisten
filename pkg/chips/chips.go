@@ -15,11 +15,7 @@ import (
 
 type ChipsAPI struct {
 	CompoData     CompoResponse
-	FilteredCompo struct {
-		Songs []Entry
-		Art   []Entry
-		Memes []Entry
-	}
+	FilteredCompo FilteredCompo
 }
 
 func (c *ChipsAPI) LoadCompo(compo int) error {
@@ -69,8 +65,12 @@ func (c *ChipsAPI) DownloadCompo(status chan messages.RPCResponse) error {
 	return nil
 }
 
-func (c *ChipsAPI) GetLoadedCompo() CompoResponse {
-	return c.CompoData
+func (c *ChipsAPI) GetLoadedCompo() GeneratedCompo {
+	k := GeneratedCompo{
+		CompoResponse: c.CompoData,
+		FilteredCompo: c.FilteredCompo,
+	}
+	return k
 }
 
 func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
