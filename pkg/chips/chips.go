@@ -9,11 +9,17 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coral/chips-synclisten/messages"
+	"github.com/coral/chips-synclisten/pkg/messages"
+	shuffle "github.com/shogo82148/go-shuffle"
 )
 
 type ChipsAPI struct {
-	CompoData CompoResponse
+	CompoData     CompoResponse
+	FilteredCompo struct {
+		Songs []Entry
+		Art   []Entry
+		Memes []Entry
+	}
 }
 
 func (c *ChipsAPI) LoadCompo(compo int) error {
@@ -29,6 +35,7 @@ func (c *ChipsAPI) LoadCompo(compo int) error {
 			defer response.Body.Close()
 			json.NewDecoder(response.Body).Decode(&resp)
 			c.CompoData = resp
+			c.shuffleAndSortCompo()
 			return nil
 		} else {
 			return fmt.Errorf("404 or something from Chips")
@@ -100,4 +107,66 @@ func (c *ChipsAPI) downloadHelper(path string, e Entry) error {
 	}
 
 	return nil
+}
+
+func (c *ChipsAPI) GetVisualEntryList() string {
+	var entrylist string
+	if len(c.FilteredCompo.Songs) > 0 {
+		entrylist += "---------SONGS---------" + " \n"
+		for _, e := range c.FilteredCompo.Songs {
+			entrylist += e.Title + " \n"
+		}
+		entrylist += "\n"
+	}
+
+	if len(c.FilteredCompo.Art) > 0 {
+		entrylist += "---------ART---------" + " \n"
+		for _, e := range c.FilteredCompo.Art {
+			entrylist += e.Title + " \n"
+		}
+		entrylist += "\n"
+	}
+
+	if len(c.FilteredCompo.Memes) > 0 {
+		entrylist += "---------MEMES---------" + " \n"
+		for _, e := range c.FilteredCompo.Memes {
+			entrylist += e.Title + " \n"
+		}
+		entrylist += "\n"
+	}
+
+	return entrylist
+}
+
+func (c *ChipsAPI) shuffleAndSortCompo() {
+
+	//Clear out the slice
+	c.FilteredCompo.Songs = nil
+	c.FilteredCompo.Art = nil
+	c.FilteredCompo.Memes = nil
+
+	for _, entry := range c.CompoData.Entries {
+		if entry.IsJoke {
+			c.FilteredCompo.Memes = append(c.FilteredCompo.Memes, entry)
+		} else {
+			e := entry.Type
+			switch e {
+			case "song":
+				c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, entry)
+
+			case "art":
+				c.FilteredCompo.Art = append(c.FilteredCompo.Art, entry)
+
+			}
+		}
+	}
+
+	shuffle.Slice(c.FilteredCompo.Songs)
+	shuffle.Slice(c.FilteredCompo.Art)
+	shuffle.Slice(c.FilteredCompo.Memes)
+
+	for _, t := range c.FilteredCompo.Songs {
+		fmt.Println(t.Title)
+	}
+
 }

@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coral/chips-synclisten/chips"
-	"github.com/coral/chips-synclisten/messages"
+	"github.com/coral/chips-synclisten/pkg/chips"
+	"github.com/coral/chips-synclisten/pkg/messages"
 	"github.com/olahol/melody"
 )
 
