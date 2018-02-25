@@ -28,13 +28,16 @@ function draw() {
 
         if(typeof fft != "undefined") {
             background(colorBg);
+            image(bgImage, 0, 0, 1280, 720);
             var spectrum = fft.analyze();
             noStroke();
-            fill(colorDarkVibrant);
+            
             for(var i = 0; i < numBars; i++) {
+                var pos = i / numBars;
+                fill(lerpColor(color(colorDarkVibrant), color(colorVibrant), pos));
                 var x = map(i, 0, numBars, 0, width);
                 var h = -height + map(spectrum[i], 0, 255, height, 0);
-                rect(x*2.5, height, (width / numBars)*2.5, h);
+                rect(x*2.5, height, (width / numBars)*2.3, h);
             }
 
 

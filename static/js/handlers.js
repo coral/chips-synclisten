@@ -3,10 +3,12 @@ var playlist = [];
 var totalLength;
 var songNumber = 1;
 var fileBucket = '';
+var bgImage;
 var song;
 
 var colorBg = "#cbcbcb";
 var colorDarkVibrant = "#424040";
+var colorVibrant = "#424040";
 
 function loadCompo(c) {
     console.log(c);
@@ -74,7 +76,6 @@ function playSong() {
         
         queueNextUp(playlist[0].title, song, function(song){
 
-            tickSong();
     
             song.play();
             playlist.shift();
@@ -127,6 +128,8 @@ function updateColors(c) {
     var img = document.createElement('img');
     img.setAttribute('src', bucket + primaryImage)
 
+    bgImage = loadImage(bucket + primaryImage.replace(/\.[^/.]+$/, "") + "_blur.jpg");
+
     img.addEventListener('load', function() {
         var vibrant = new Vibrant(img);
         var swatches = vibrant.swatches()
@@ -145,6 +148,7 @@ function updateColors(c) {
                         break;
                     case "Vibrant":
                         newColors.push({Name: 'vibrant', Color: swatches[swatch].getHex()})
+                        colorVibrant = swatches[swatch].getHex();
                         break;
                     case "DarkVibrant":
                         newColors.push({Name: 'darkvibrant', Color: swatches[swatch].getHex()})
@@ -192,7 +196,13 @@ function queueNextUp(title, song, callback) {
         complete: function(anim) {
             $('#entry-title').text(playlist[0].title);
             $('#entry-description').text(playlist[0].description);
+            tickSong();
         }
+    })
+    .add({
+        targets: '.progress',
+        opacity: 0,
+        duration: 1000,
     })
     .add({
         targets: '.nextentry',
@@ -208,5 +218,10 @@ function queueNextUp(title, song, callback) {
             })
             callback(song);
         }
+    })
+    .add({
+        targets: '.progress',
+        opacity: 0.9,
+        duration: 2000,
     })
 }

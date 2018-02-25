@@ -6,10 +6,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
 	"github.com/coral/chips-synclisten/pkg/messages"
+	"github.com/disintegration/imaging"
 	shuffle "github.com/shogo82148/go-shuffle"
 )
 
@@ -124,11 +126,6 @@ func (c *ChipsAPI) imageDownloadHelper(path string, image string) error {
 	tokens := strings.Split(image, "/")
 	fileName := tokens[len(tokens)-1]
 
-	//Check if file is already cached
-	if _, err := os.Stat(path + "/" + fileName); err == nil {
-		return nil
-	}
-
 	//Create File
 	output, err := os.Create(path + "/" + fileName)
 	if err != nil {
@@ -150,6 +147,19 @@ func (c *ChipsAPI) imageDownloadHelper(path string, image string) error {
 	_, err = io.Copy(output, response.Body)
 	if err != nil {
 		return fmt.Errorf("Error while downloading", image, "-", err)
+	}
+
+	src, err := imaging.Open(path + "/" + fileName)
+	if err != nil {
+		return fmt.Errorf("Could not open image for processing", "-", err)
+	}
+
+	blurred := imaging.Blur(src, 20)
+	blurred = imaging.AdjustBrightness(blurred, -10)
+
+	err = imaging.Save(blurred, path+"/"+strings.TrimSuffix(fileName, filepath.Ext(fileName))+"_blur.jpg")
+	if err != nil {
+		return fmt.Errorf("Could not save processed image", "-", err)
 	}
 
 	return nil
