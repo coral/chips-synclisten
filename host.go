@@ -19,6 +19,7 @@ func main() {
 
 	var pollyKey = flag.String("pollykey", "", "Key for AWS Polly")
 	var pollySecret = flag.String("pollysecret", "", "Secret for AWS Polly")
+	flag.Parse()
 
 	r := gin.Default()
 	m := melody.New()
