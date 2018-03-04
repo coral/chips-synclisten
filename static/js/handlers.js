@@ -3,16 +3,17 @@ var playlist = [];
 var totalLength;
 var songNumber = 1;
 var fileBucket = '';
+var compoName = "";
 var bgImage;
 var song;
 
-var colorBg = "#cbcbcb";
-var colorDarkVibrant = "#424040";
-var colorVibrant = "#424040";
+var colorBg = "#000000";
+var colorDarkVibrant = "#000000";
+var colorVibrant = "#000000";
 
 function loadCompo(c) {
     console.log(c);
-
+    compoName = c.cdata.compo.name;
     $('#compo').text("CHIPS COMPO: " + c.cdata.compo.name)
     $('.entry-image').css("background-image", "url("+c.cdata.compo.primary_image+")");
     $('.componame').text("CHIPS COMPO: " + c.cdata.compo.name)
@@ -76,7 +77,7 @@ function playSong() {
         
         queueNextUp(playlist[0].title, song, function(song){
 
-    
+            $(".bgrender").css('opacity', '1.0');
             song.play();
             playlist.shift();
     
@@ -124,10 +125,20 @@ function updateColors(c) {
     var bucket = 'tmp/compos/' + c.cdata.compo.id + '/';
     var parts = c.cdata.compo.primary_image.split('/');
     var primaryImage = parts.pop() || parts.pop();
+    var blurURL = bucket + primaryImage.replace(/\.[^/.]+$/, "") + "_blur.jpg"
+    $(".bgimage").css('background-image','url(' + blurURL + ')');
+    
+    anime({
+        targets: ".bgimage",
+        opacity: 1,
+        duration: 4000,
+        easing: 'linear'
+    })
+
     var img = document.createElement('img');
     img.setAttribute('src', bucket + primaryImage)
 
-    bgImage = loadImage(bucket + primaryImage.replace(/\.[^/.]+$/, "") + "_blur.jpg");
+    bgImage = loadImage(blurURL);
 
     img.addEventListener('load', function() {
         var vibrant = new Vibrant(img);
@@ -163,6 +174,13 @@ function updateColors(c) {
             }
         }
 
+        if(tinycolor(colorBg).getLuminance() < 0.1 && tinycolor(colorDarkVibrant).getLuminance() < 0.1)
+        {
+            colorDarkVibrant = tinycolor(colorVibrant).brighten(20).toString();
+        }
+
+        
+
         for (var color in newColors) {
             d = newColors[color];
 
@@ -195,6 +213,7 @@ function queueNextUp(title, song, callback) {
         complete: function(anim) {
             $('#entry-title').text(playlist[0].title);
             $('#entry-description').text(playlist[0].description);
+            playTTS(title);
             tickSong();
         }
     })
@@ -223,4 +242,27 @@ function queueNextUp(title, song, callback) {
         opacity: 0.9,
         duration: 2000,
     })
+}
+
+function playTTS(title) {
+
+    var m = "In the " + compoName +", here comes the song: " + title;
+    var request = new XMLHttpRequest();
+    request.open("POST", "/tts", true);
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    request.responseType = "blob";
+    request.onreadystatechange = function() {
+        if(request.readyState == XMLHttpRequest.DONE && request.status == 200) {
+            var blob = new Blob([this.response], {type: "audio/mpeg"});
+            var url = URL.createObjectURL(blob);
+            var tts = loadSound(url, function(tts){
+                $(".bgrender").css('opacity', '0.0');
+                tts.setVolume(2.0);
+                tts.play();
+            });
+        }
+    }
+    request.send("message="+m); 
+
+
 }

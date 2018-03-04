@@ -9,6 +9,10 @@ type PollyClient struct {
 	psecret string
 }
 
+type PollyRequest struct {
+	Message string `json:"message" binding:"required"`
+}
+
 func (p *PollyClient) GetTTS(text string) ([]byte, error) {
 
 	polly := golang_tts.New(p.pkey, p.psecret)

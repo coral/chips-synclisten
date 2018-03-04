@@ -52,6 +52,7 @@ func main() {
 			fmt.Println(err)
 			return
 		}
+		//vEnc := b64.StdEncoding.EncodeToString(v)
 		c.Data(200, "audio/mpeg", v)
 	})
 
