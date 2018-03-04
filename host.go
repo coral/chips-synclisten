@@ -37,8 +37,9 @@ func main() {
 	//refactor this
 	polly := polly.PollyClient{}
 	polly.DefineSecrets("", "")
-	r.GET("/pollytest", func(c *gin.Context) {
-		v, err := polly.GetTTS("HAHAH THIS SHIT WORKS")
+	r.POST("/tts", func(c *gin.Context) {
+		message := c.PostForm("message")
+		v, err := polly.GetTTS(message)
 		if err != nil {
 			fmt.Println(err)
 			return
