@@ -246,7 +246,7 @@ function queueNextUp(title, song, callback) {
 
 function playTTS(title) {
 
-    var m = "In the " + compoName +", here comes the song: " + title;
+    var m = compoName +", here comes the song: " + title;
     var request = new XMLHttpRequest();
     request.open("POST", "/tts", true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -257,7 +257,7 @@ function playTTS(title) {
             var url = URL.createObjectURL(blob);
             var tts = loadSound(url, function(tts){
                 $(".bgrender").css('opacity', '0.0');
-                tts.setVolume(2.0);
+                tts.setVolume(2.5);
                 tts.play();
             });
         }
