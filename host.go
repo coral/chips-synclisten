@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
 	"github.com/coral/chips-synclisten/pkg/chips"
@@ -11,11 +12,17 @@ import (
 	"github.com/olahol/melody"
 )
 
+var tts polly.PollyClient
+var compo chips.ChipsAPI
+
 func main() {
+
+	var pollyKey = flag.String("pollykey", "", "Key for AWS Polly")
+	var pollySecret = flag.String("pollysecret", "", "Secret for AWS Polly")
 
 	r := gin.Default()
 	m := melody.New()
-	compo := chips.ChipsAPI{}
+	compo = chips.ChipsAPI{}
 
 	r.Use(static.Serve("/tmp/", static.LocalFile("tmp", true)))
 	r.Use(static.Serve("/", static.LocalFile("static", true)))
@@ -35,11 +42,11 @@ func main() {
 	})
 
 	//refactor this
-	polly := polly.PollyClient{}
-	polly.DefineSecrets("", "")
+	tts = polly.PollyClient{}
+	tts.DefineSecrets(*pollyKey, *pollySecret)
 	r.POST("/tts", func(c *gin.Context) {
 		message := c.PostForm("message")
-		v, err := polly.GetTTS(message)
+		v, err := tts.GetTTS(message)
 		if err != nil {
 			fmt.Println(err)
 			return
