@@ -1,10 +1,10 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/coral/chips-synclisten/pkg/chips"
+	"github.com/coral/chips-synclisten/pkg/credentials"
 	"github.com/coral/chips-synclisten/pkg/functions"
 	"github.com/coral/chips-synclisten/pkg/polly"
 	"github.com/gin-gonic/contrib/static"
@@ -17,12 +17,12 @@ var compo chips.ChipsAPI
 
 func main() {
 
-	var pollyKey = flag.String("pollykey", "", "Key for AWS Polly")
-	var pollySecret = flag.String("pollysecret", "", "Secret for AWS Polly")
-	flag.Parse()
-
 	r := gin.Default()
 	m := melody.New()
+	cred, err := credentials.LoadCredentials()
+	if err != nil {
+		panic("could not load credentials")
+	}
 	compo = chips.ChipsAPI{}
 
 	r.Use(static.Serve("/tmp/", static.LocalFile("tmp", true)))
@@ -44,7 +44,7 @@ func main() {
 
 	//refactor this
 	tts = polly.PollyClient{}
-	tts.DefineSecrets(*pollyKey, *pollySecret)
+	tts.DefineSecrets(cred.Polly.Key, cred.Polly.Secret)
 	r.POST("/tts", func(c *gin.Context) {
 		message := c.PostForm("message")
 		v, err := tts.GetTTS(message)
