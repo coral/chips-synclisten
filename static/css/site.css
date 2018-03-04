@@ -25,7 +25,7 @@ body {
     position: absolute;
     text-align: center;
     width: 1280px;
-    top: 220px;
+    top: 120px;
 }
 
 .end {
@@ -37,7 +37,13 @@ body {
     top: 200px;
     opacity: 0;
 }
-
+.chipslogo {
+    margin-left: 430px;
+    width: 403px;
+    height: 379px;
+    background-image: url('/assets/logo.png');
+    background-size: cover;
+}
 .componame {
     font-size: 80px;
     font-weight: bold;
