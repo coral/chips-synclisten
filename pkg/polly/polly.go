@@ -1,7 +1,7 @@
 package polly
 
 import (
-	"github.com/leprosus/golang-tts"
+	"github.com/coral/golang-tts"
 )
 
 type PollyClient struct {
