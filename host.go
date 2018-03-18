@@ -5,6 +5,7 @@ import (
 
 	"github.com/coral/chips-synclisten/pkg/chips"
 	"github.com/coral/chips-synclisten/pkg/credentials"
+	"github.com/coral/chips-synclisten/pkg/discord"
 	"github.com/coral/chips-synclisten/pkg/functions"
 	"github.com/coral/chips-synclisten/pkg/polly"
 	"github.com/gin-gonic/contrib/static"
@@ -25,6 +26,8 @@ func main() {
 	}
 	compo = chips.ChipsAPI{}
 
+	//WEB ROUTES
+
 	r.Use(static.Serve("/tmp/", static.LocalFile("tmp", true)))
 	r.Use(static.Serve("/", static.LocalFile("static", true)))
 
@@ -42,7 +45,14 @@ func main() {
 		c.JSON(200, e)
 	})
 
-	//refactor this
+	//DISCORD BINDING
+
+	discord := discord.Discord{}
+	discord.SetToken(cred.Discord.Token)
+	discord.SetChannel(cred.Discord.ChannelID)
+	discord.Connect()
+
+	//POLLY STUFF
 	tts = polly.PollyClient{}
 	tts.DefineSecrets(cred.Polly.Key, cred.Polly.Secret)
 	r.POST("/tts", func(c *gin.Context) {
@@ -56,9 +66,11 @@ func main() {
 		c.Data(200, "audio/mpeg", v)
 	})
 
+	//BIND THE RPC
 	rpc := functions.RPC{}
-	rpc.Bind(m, &compo)
+	rpc.Bind(m, &compo, &discord)
 
+	//HOST THE WEBSERVER
 	r.Run(":4020")
 
 }

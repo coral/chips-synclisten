@@ -18,6 +18,7 @@ import (
 type ChipsAPI struct {
 	CompoData     CompoResponse
 	FilteredCompo FilteredCompo
+	MappedEntries map[int]Entry
 }
 
 func (c *ChipsAPI) LoadCompo(compo int) error {
@@ -27,25 +28,29 @@ func (c *ChipsAPI) LoadCompo(compo int) error {
 	response, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Something went wrong with the request to Chips")
-	} else {
-		if response.StatusCode == 200 {
-			resp := CompoResponse{}
-			defer response.Body.Close()
-			json.NewDecoder(response.Body).Decode(&resp)
-			c.CompoData = resp
-			c.shuffleAndSortCompo()
-			return nil
-		} else {
-			return fmt.Errorf("404 or something from Chips")
+	}
+
+	if response.StatusCode == 200 {
+		resp := CompoResponse{}
+		defer response.Body.Close()
+		json.NewDecoder(response.Body).Decode(&resp)
+		c.CompoData = resp
+		c.shuffleAndSortCompo()
+
+		c.MappedEntries = make(map[int]Entry)
+		for _, entry := range c.CompoData.Entries {
+			c.MappedEntries[entry.ID] = entry
 		}
 
+		return nil
 	}
-	return fmt.Errorf("Could not get compo data")
+
+	return fmt.Errorf("404 or something from Chips")
 
 }
 
 func (c *ChipsAPI) DownloadCompo(status chan messages.RPCResponse) error {
-	var p string = "tmp/compos/" + strconv.Itoa(c.CompoData.Compo.ID)
+	var p = "tmp/compos/" + strconv.Itoa(c.CompoData.Compo.ID)
 	os.MkdirAll(p, 0777)
 
 	for _, compo := range c.CompoData.Entries {
@@ -175,23 +180,29 @@ func (c *ChipsAPI) GetVisualEntryList() string {
 		entrylist += "\n"
 	}
 
-	if len(c.FilteredCompo.Art) > 0 {
-		entrylist += "---------ART---------" + " \n"
-		for _, e := range c.FilteredCompo.Art {
-			entrylist += e.Title + " \n"
+	/*
+		if len(c.FilteredCompo.Art) > 0 {
+			entrylist += "---------ART---------" + " \n"
+			for _, e := range c.FilteredCompo.Art {
+				entrylist += e.Title + " \n"
+			}
+			entrylist += "\n"
 		}
-		entrylist += "\n"
-	}
 
-	if len(c.FilteredCompo.Memes) > 0 {
-		entrylist += "---------MEMES---------" + " \n"
-		for _, e := range c.FilteredCompo.Memes {
-			entrylist += e.Title + " \n"
+		if len(c.FilteredCompo.Memes) > 0 {
+			entrylist += "---------MEMES---------" + " \n"
+			for _, e := range c.FilteredCompo.Memes {
+				entrylist += e.Title + " \n"
+			}
+			entrylist += "\n"
 		}
-		entrylist += "\n"
-	}
+	*/
 
 	return entrylist
+}
+
+func (c *ChipsAPI) GetEntryByID(id int) Entry {
+	return c.MappedEntries[id]
 }
 
 func (c *ChipsAPI) shuffleAndSortCompo() {

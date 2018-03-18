@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/coral/chips-synclisten/pkg/discord"
+
 	"github.com/coral/chips-synclisten/pkg/chips"
 	"github.com/coral/chips-synclisten/pkg/messages"
 	"github.com/olahol/melody"
@@ -17,14 +19,16 @@ type RemoteCall struct {
 }
 
 type RPC struct {
-	m      *melody.Melody
-	status chan messages.RPCResponse
-	compo  *chips.ChipsAPI
+	m       *melody.Melody
+	status  chan messages.RPCResponse
+	compo   *chips.ChipsAPI
+	discord *discord.Discord
 }
 
-func (r *RPC) Bind(m *melody.Melody, newCompo *chips.ChipsAPI) {
+func (r *RPC) Bind(m *melody.Melody, newCompo *chips.ChipsAPI, newDiscord *discord.Discord) {
 	r.m = m
 	r.compo = newCompo
+	r.discord = newDiscord
 	r.status = make(chan messages.RPCResponse, 100)
 	go r.broadcast()
 	m.HandleMessage(r.HandleRemoteCall)
@@ -78,6 +82,17 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 		r.StartCompo()
 	}
 
+	if strings.ToLower(call.Function) == "playsong" {
+		songid, _ := strconv.Atoi(call.Message)
+		fmt.Println(songid)
+		r.PlaySong(songid)
+	}
+
+	if strings.ToLower(call.Function) == "postsonglist" {
+
+		r.PostSongList()
+	}
+
 }
 
 func (r *RPC) FetchCompo(c int) {
@@ -110,4 +125,16 @@ func (r *RPC) StartCompo() {
 	loadedCompo := r.compo.GetLoadedCompo()
 	jsonCompo, _ := json.Marshal(loadedCompo)
 	r.status <- messages.RPCResponse{Message: "Start", Data: string(jsonCompo)}
+}
+
+func (r *RPC) PlaySong(song int) {
+	entry := r.compo.GetEntryByID(song)
+	message := "NEXT UP: "
+	message = message + "**" + entry.Title + "**\n<https://chipscompo.com/entry/" + strconv.Itoa(entry.ID) + "> \n```" + entry.Description + "```"
+	r.discord.SendChannelMessage(message)
+}
+
+func (r *RPC) PostSongList() {
+	e := r.compo.GetVisualEntryList()
+	r.discord.SendChannelMessage(e)
 }

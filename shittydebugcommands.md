@@ -12,3 +12,5 @@
 { "function": "download", "message": "46"}
 { "function": "fetch", "message": "46"}
 { "function": "start", "message": "46"}
+
+{ "function": "playsong", "message": "1073"}

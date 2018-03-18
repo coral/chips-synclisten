@@ -11,6 +11,11 @@ type Credentials struct {
 		Key    string `json:"key"`
 		Secret string `json:"secret"`
 	} `json:"polly"`
+
+	Discord struct {
+		Token     string `json:"token"`
+		ChannelID string `json:"channelid"`
+	} `json:"discord"`
 }
 
 func LoadCredentials() (Credentials, error) {

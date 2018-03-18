@@ -14,10 +14,10 @@ var colorVibrant = "#000000";
 function loadCompo(c) {
     console.log(c);
     compoName = c.cdata.compo.name;
-    $('#compo').text("CHIPS COMPO: " + c.cdata.compo.name)
+    $('#compo').text("CHIPS COMPO: " + c.cdata.compo.name);
     $('.entry-image').css("background-image", "url("+c.cdata.compo.primary_image+")");
     $('.componame').text("CHIPS COMPO: " + c.cdata.compo.name)
-
+    
     updateColors(c);
 }
 
@@ -25,7 +25,7 @@ function startCompo(c) {
     var compo = c;
     $('#compo').text("CHIPS COMPO: " + c.cdata.compo.name)
     $('.entry-image').css("background-image", "url("+c.cdata.compo.primary_image+")"); 
-
+    
     
     fileBucket = 'tmp/compos/' + compo.cdata.compo.id + '/';
     
@@ -35,17 +35,22 @@ function startCompo(c) {
         }
     });
     totalLength = playlist.length;
-
-
-
+    
+    
+    
     playSong();
     $('#entry-title').text(playlist[0].title);
     $('#entry-description').text(playlist[0].description);
-
-
+    var nm = JSON.stringify({
+        "function": "postsonglist",
+        "message": ""
+    });
+    sendMessage(nm);
+    
+    
     var startAnimation = anime.timeline();
     startAnimation
-   .add({
+    .add({
         targets: '.pre',
         opacity: 0,
         duration: 1000,
@@ -57,44 +62,50 @@ function startCompo(c) {
         duration: 2000,
         easing: 'linear'
     })
-
+    
 }
 
 function playSong() {
-
+    
     //Check if playlist is empty and if end compo
     if(_.isEmpty(playlist)) {
         endCompo();
         return;
     }
-
+    
     var parts = playlist[0].uploaded_url.split('/');
     var filename = parts.pop() || parts.pop();
 
-
+        
     song = loadSound(fileBucket + filename, function(song){
-
+        
         
         queueNextUp(playlist[0].title, song, function(song){
-
+            
+            var nm = JSON.stringify({
+                "function": "playsong",
+                "message": playlist[0].id.toString()
+            });
+            sendMessage(nm);
+            
             $(".bgrender").css('opacity', '1.0');
             song.play();
             playlist.shift();
-    
+            
             song.onended(function(){
                 playSong();
             });
-
+            
         });
-
+        
     });
-
+    
 }
 
 function endCompo() {
     var endAnimation = anime.timeline();
     endAnimation
-   .add({
+    .add({
         targets: '.entry-container',
         opacity: 0,
         duration: 3000,
@@ -115,7 +126,7 @@ function tickSong() {
     } else {
         songAppend = "<b>Next:</b> " + playlist[1].title + " - ";
     }
-
+    
     $('#entry-counter').html(songAppend + "Song " +  songNumber + "/" + totalLength)
     songNumber++;
 }
@@ -134,12 +145,12 @@ function updateColors(c) {
         duration: 4000,
         easing: 'linear'
     })
-
+    
     var img = document.createElement('img');
     img.setAttribute('src', bucket + primaryImage)
-
+    
     bgImage = loadImage(blurURL);
-
+    
     img.addEventListener('load', function() {
         var vibrant = new Vibrant(img);
         var swatches = vibrant.swatches()
@@ -149,48 +160,48 @@ function updateColors(c) {
             if (swatches.hasOwnProperty(swatch) && swatches[swatch]) {
                 switch(swatch) {
                     case "LightMuted":
-                        newColors.push({Name: 'muted', Color: swatches[swatch].getHex()})
-                        colorBg = swatches[swatch].getHex();
-                        break;
+                    newColors.push({Name: 'muted', Color: swatches[swatch].getHex()})
+                    colorBg = swatches[swatch].getHex();
+                    break;
                     case "LightVibrant":
-                        newColors.push({Name: 'muted', Color: swatches[swatch].getHex()})
-                        colorBg = swatches[swatch].getHex();
-                        break;
+                    newColors.push({Name: 'muted', Color: swatches[swatch].getHex()})
+                    colorBg = swatches[swatch].getHex();
+                    break;
                     case "Vibrant":
-                        newColors.push({Name: 'vibrant', Color: swatches[swatch].getHex()})
-                        colorVibrant = swatches[swatch].getHex();
-                        break;
+                    newColors.push({Name: 'vibrant', Color: swatches[swatch].getHex()})
+                    colorVibrant = swatches[swatch].getHex();
+                    break;
                     case "DarkVibrant":
-                        newColors.push({Name: 'darkvibrant', Color: swatches[swatch].getHex()})
-                        colorDarkVibrant = swatches[swatch].getHex();
-                        break;
+                    newColors.push({Name: 'darkvibrant', Color: swatches[swatch].getHex()})
+                    colorDarkVibrant = swatches[swatch].getHex();
+                    break;
                     case "DarkMuted":
-                        newColors.push({Name: 'darkmuted', Color: swatches[swatch].getHex()})
-                        
-                        break;
+                    newColors.push({Name: 'darkmuted', Color: swatches[swatch].getHex()})
+                    
+                    break;
                     default: 
-                        break;
+                    break;
                 }
             }
         }
-
+        
         if(tinycolor(colorBg).getLuminance() < 0.1 && tinycolor(colorDarkVibrant).getLuminance() < 0.1)
         {
             colorDarkVibrant = tinycolor(colorVibrant).brighten(20).toString();
         }
-
         
-
+        
+        
         for (var color in newColors) {
             d = newColors[color];
-
+            
             anime({
                 targets: "." + d.Name + "-fg",
                 color: d.Color,
                 duration: 1000,
                 easing: 'linear'
             })
-
+            
             anime({
                 targets: "." + d.Name + "-bg",
                 backgroundColor: d.Color,
@@ -198,12 +209,12 @@ function updateColors(c) {
                 easing: 'linear'
             })
         }
-            
+        
     });
 }
 
 function queueNextUp(title, song, callback) {
-    $('#nextentry-title').html("<b>NEXT UP:</b> " + title);
+    $('#nextentry-title').html("<b>NOW PLAYING:</b> " + title);
     var nextUp = anime.timeline();
     nextUp.add({
         targets: '.nextentry',
@@ -229,7 +240,7 @@ function queueNextUp(title, song, callback) {
         easing: 'easeInOutQuart',
         offset: '+=10000',
         complete: function(anim) {
-           anime({
+            anime({
                 targets: '.nextentry',
                 translateX: 0,
                 duration: 0
@@ -245,7 +256,7 @@ function queueNextUp(title, song, callback) {
 }
 
 function playTTS(title) {
-
+    
     var m = compoName +", here comes the song: " + title;
     var request = new XMLHttpRequest();
     request.open("POST", "/tts", true);
@@ -263,6 +274,6 @@ function playTTS(title) {
         }
     }
     request.send("message="+m); 
-
-
+    
+    
 }
