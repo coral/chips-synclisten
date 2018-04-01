@@ -1,12 +1,11 @@
 body { 
-    margin: 0;
+    margin: 0 auto;
     overflow: hidden;
     color: black;
     background-color: #cbcbcb;
     font-family: 'Dosis', sans-serif;
     width: 1280px;
     height: 720px;
-    overflow: hidden;
 }
 
 .bgimage {

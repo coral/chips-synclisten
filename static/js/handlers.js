@@ -6,6 +6,7 @@ var fileBucket = '';
 var compoName = "";
 var bgImage;
 var song;
+var strings;
 
 var colorBg = "#000000";
 var colorDarkVibrant = "#000000";
@@ -13,11 +14,20 @@ var colorVibrant = "#000000";
 
 function loadCompo(c) {
     console.log(c);
+    $.getJSON("assets/strings.json", function (data) {
+        strings = data;
+    });
     compoName = c.cdata.compo.name;
     $('#compo').text("CHIPS COMPO: " + c.cdata.compo.name);
     $('.entry-image').css("background-image", "url("+c.cdata.compo.primary_image+")");
     $('.componame').text("CHIPS COMPO: " + c.cdata.compo.name)
     
+    var nm = JSON.stringify({
+        "function": "postsonglist",
+        "message": ""
+    });
+    sendMessage(nm);
+
     updateColors(c);
 }
 
@@ -41,11 +51,7 @@ function startCompo(c) {
     playSong();
     $('#entry-title').text(playlist[0].title);
     $('#entry-description').text(playlist[0].description);
-    var nm = JSON.stringify({
-        "function": "postsonglist",
-        "message": ""
-    });
-    sendMessage(nm);
+
     
     
     var startAnimation = anime.timeline();
@@ -257,7 +263,8 @@ function queueNextUp(title, song, callback) {
 
 function playTTS(title) {
     
-    var m = compoName +", here comes the song: " + title;
+    st = _.sample(strings.introductions)
+    var m = compoName +","+st+" " + title;
     var request = new XMLHttpRequest();
     request.open("POST", "/tts", true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");

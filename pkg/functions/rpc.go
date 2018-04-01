@@ -130,7 +130,10 @@ func (r *RPC) StartCompo() {
 func (r *RPC) PlaySong(song int) {
 	entry := r.compo.GetEntryByID(song)
 	message := "NEXT UP: "
-	message = message + "**" + entry.Title + "**\n<https://chipscompo.com/entry/" + strconv.Itoa(entry.ID) + "> \n```" + entry.Description + "```"
+	message = message + "**" + entry.Title + "**\n<https://chipscompo.com/entry/" + strconv.Itoa(entry.ID) + ">"
+	if entry.Description != "" {
+		message = message + " \n```" + entry.Description + "```"
+	}
 	r.discord.SendChannelMessage(message)
 }
 
