@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -23,8 +24,13 @@ type ChipsAPI struct {
 
 func (c *ChipsAPI) LoadCompo(compo int) error {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", "https://chipscompo.com/api/compo/"+strconv.Itoa(compo), nil)
-	//req, err := http.NewRequest("GET", "http://127.0.0.1:8080/46.json", nil)
+	//This is to easier debug entire compo, the compo 0 contains only 1 track.
+
+	requestString := "https://chipscompo.com/api/compo/" + strconv.Itoa(compo)
+	if compo == 0 {
+		requestString = "http://127.0.0.1:4020/assets/52.json"
+	}
+	req, err := http.NewRequest("GET", requestString, nil)
 	response, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("Something went wrong with the request to Chips")
@@ -205,12 +211,33 @@ func (c *ChipsAPI) GetEntryByID(id int) Entry {
 	return c.MappedEntries[id]
 }
 
+type Weight struct {
+	Downweight []int `json:"down"`
+}
+
 func (c *ChipsAPI) shuffleAndSortCompo() {
+
+	//Loading a JSON to weight a song....
+	//This is so fucking stupid but i see the use case, have to rethink the entire playlist system really because this is just a bad solution
+	//BUT HEY WHATEVER WORKS RIGHT
+	//fuck me
+	//this is one of the worst hacks of my lifetime
+
+	jsonFile, err := os.Open("weight.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer jsonFile.Close()
+	byteValue, _ := ioutil.ReadAll(jsonFile)
+	var songWeight Weight
+	json.Unmarshal(byteValue, &songWeight)
 
 	//Clear out the slice
 	c.FilteredCompo.Songs = nil
 	c.FilteredCompo.Art = nil
 	c.FilteredCompo.Memes = nil
+
+	var downweightedSongs []Entry
 
 	for _, entry := range c.CompoData.Entries {
 		if entry.IsJoke {
@@ -219,7 +246,16 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 			e := entry.Type
 			switch e {
 			case "song":
-				c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, entry)
+				appendTrack := true
+				for _, b := range songWeight.Downweight {
+					if entry.ID == b {
+						downweightedSongs = append(downweightedSongs, entry)
+						appendTrack = false
+					}
+				}
+				if appendTrack {
+					c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, entry)
+				}
 
 			case "art":
 				c.FilteredCompo.Art = append(c.FilteredCompo.Art, entry)
@@ -231,5 +267,6 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 	shuffle.Slice(c.FilteredCompo.Songs)
 	shuffle.Slice(c.FilteredCompo.Art)
 	shuffle.Slice(c.FilteredCompo.Memes)
+	c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, downweightedSongs...)
 
 }
