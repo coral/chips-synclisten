@@ -237,8 +237,6 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 	c.FilteredCompo.Art = nil
 	c.FilteredCompo.Memes = nil
 
-	var downweightedSongs []Entry
-
 	for _, entry := range c.CompoData.Entries {
 		if entry.IsJoke {
 			c.FilteredCompo.Memes = append(c.FilteredCompo.Memes, entry)
@@ -246,16 +244,7 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 			e := entry.Type
 			switch e {
 			case "song":
-				appendTrack := true
-				for _, b := range songWeight.Downweight {
-					if entry.ID == b {
-						downweightedSongs = append(downweightedSongs, entry)
-						appendTrack = false
-					}
-				}
-				if appendTrack {
-					c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, entry)
-				}
+				c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, entry)
 
 			case "art":
 				c.FilteredCompo.Art = append(c.FilteredCompo.Art, entry)
@@ -263,10 +252,10 @@ func (c *ChipsAPI) shuffleAndSortCompo() {
 			}
 		}
 	}
-
 	shuffle.Slice(c.FilteredCompo.Songs)
 	shuffle.Slice(c.FilteredCompo.Art)
 	shuffle.Slice(c.FilteredCompo.Memes)
-	c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, downweightedSongs...)
+
+	//c.FilteredCompo.Songs = append(c.FilteredCompo.Songs, downweightedSongs...)
 
 }

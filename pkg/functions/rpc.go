@@ -39,7 +39,7 @@ func (r *RPC) Bind(m *melody.Melody, newCompo *chips.ChipsAPI, newDiscord *disco
 func (r *RPC) broadcast() {
 	for {
 		message := <-r.status
-		fmt.Println(message)
+		//fmt.Println(message)
 		jsresp, _ := json.Marshal(message)
 		r.m.Broadcast(jsresp)
 	}
@@ -96,12 +96,7 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 }
 
 func (r *RPC) FetchCompo(c int) {
-	compo := chips.ChipsAPI{}
-	err := compo.LoadCompo(c)
-	if err != nil {
-		fmt.Println(err)
-	}
-	jsonCompo, _ := json.Marshal(compo.GetLoadedCompo())
+	jsonCompo, _ := json.Marshal(r.compo.GetLoadedCompo())
 	r.status <- messages.RPCResponse{Message: "Compodata", Data: string(jsonCompo)}
 }
 

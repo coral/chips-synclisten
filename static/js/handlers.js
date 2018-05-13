@@ -70,11 +70,8 @@ function startCompo(c) {
 
     fileBucket = 'tmp/compos/' + compo.cdata.compo.id + '/';
 
-    _.forEach(c.cgen.songs, function (entry) {
-        if (entry.type == "song" && !entry.is_joke) {
-            playlist.push(entry);
-        }
-    });
+    console.log(c)
+    playlist = c.cgen.songs;
     totalLength = playlist.length;
 
 
