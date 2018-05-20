@@ -61,6 +61,12 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 		r.FetchCompo(componumber)
 	}
 
+	if strings.ToLower(call.Function) == "nointro" {
+		componumber, _ := strconv.Atoi(call.Message)
+		fmt.Println("Fetching compo: ", componumber)
+		r.FetchCompoIntroless(componumber)
+	}
+
 	if strings.ToLower(call.Function) == "get" {
 		componumber, _ := strconv.Atoi(call.Message)
 		fmt.Println("Returning loaded compo: ", componumber)
@@ -98,6 +104,11 @@ func (r *RPC) HandleRemoteCall(s *melody.Session, msg []byte) {
 func (r *RPC) FetchCompo(c int) {
 	jsonCompo, _ := json.Marshal(r.compo.GetLoadedCompo())
 	r.status <- messages.RPCResponse{Message: "Compodata", Data: string(jsonCompo)}
+}
+
+func (r *RPC) FetchCompoIntroless(c int) {
+	jsonCompo, _ := json.Marshal(r.compo.GetLoadedCompo())
+	r.status <- messages.RPCResponse{Message: "NoIntro", Data: string(jsonCompo)}
 }
 
 func (r *RPC) DownloadCompo(c int, status chan messages.RPCResponse) {

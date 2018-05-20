@@ -16,7 +16,7 @@ var colorBg = "#000000";
 var colorDarkVibrant = "#000000";
 var colorVibrant = "#000000";
 
-function loadCompo(c) {
+function loadCompo(c, runIntro) {
     $.getJSON("assets/strings.json", function (data) {
         strings = data;
     });
@@ -34,32 +34,36 @@ function loadCompo(c) {
 
     updateColors(c);
 
+    if (runIntro) 
+    {
+        intro = loadSound("http://chips-synclisten.s3-us-west-2.amazonaws.com/intro/eggtro.mp3", function (song) {
+            song.play()
 
+            var startAnimation = anime.timeline();
+            startAnimation
+                .add({
+                    targets: '.startingsoon',
+                    opacity: 0,
+                    duration: 1000,
+                    complete: function (anim) {
+                        $('.startingsoon').remove();
+                    },
+                    easing: 'linear'
+                }).add({
+                    targets: '.cd',
+                    opacity: 1,
+                    duration: 2000,
+                    easing: 'linear'
+                })
 
-    intro = loadSound("assets/intro.mp3", function (song) {
-        song.play()
+            song.onended(function () {
+                startCompo(activeCompo)
+            });
+        })
+    } else {
+        startCompo(activeCompo)
+    }
 
-        var startAnimation = anime.timeline();
-        startAnimation
-            .add({
-                targets: '.startingsoon',
-                opacity: 0,
-                duration: 1000,
-                complete: function (anim) {
-                    $('.startingsoon').remove();
-                },
-                easing: 'linear'
-            }).add({
-                targets: '.cd',
-                opacity: 1,
-                duration: 2000,
-                easing: 'linear'
-            })
-
-        song.onended(function () {
-            startCompo(activeCompo)
-        });
-    })
 }
 
 function startCompo(c) {
@@ -151,7 +155,7 @@ function endCompo() {
             duration: 1000,
             easing: 'linear'
         })
-    outro = loadSound("assets/outro.mp3", function (song) {
+    outro = loadSound("http://chips-synclisten.s3-us-west-2.amazonaws.com/outro/outro.mp3", function (song) {
         $(".bgrender").css('opacity', '0.0');
         song.play()
         song.onended(function () {

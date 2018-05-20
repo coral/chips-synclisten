@@ -42,6 +42,9 @@ $( "#download" ).click(function() {
 $( "#fetch" ).click(function() {
     sendMessage(JSON.stringify({"function":"fetch", "message":getCompo()}));
 });
+$( "#nointro" ).click(function() {
+    sendMessage(JSON.stringify({"function":"nointro", "message":getCompo()}));
+});
 $( "#start" ).click(function() {
     sendMessage(JSON.stringify({"function":"start", "message":getCompo()}));
 });

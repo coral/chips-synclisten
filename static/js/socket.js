@@ -9,7 +9,11 @@ ws.onmessage = function(evt){
             break;
         case "Compodata":
             var compodata = JSON.parse(message.Data);
-            loadCompo(compodata);
+            loadCompo(compodata, true);
+            break;
+        case "NoIntro":
+            var compodata = JSON.parse(message.Data);
+            loadCompo(compodata, false);
             break;
         case "Start":
             var compodata = JSON.parse(message.Data);
