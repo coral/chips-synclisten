@@ -271,7 +271,8 @@ function updateColors(c) {
     });
 }
 
-function queueNextUp(title, song, callback) {
+function queueNextUp(titleUF, song, callback) {
+    var title = titleUF.substr(1, 40);
     $('#nextentry-title').html("<b>NOW PLAYING:</b> " + title);
     var nextUp = anime.timeline();
     nextUp.add({
@@ -313,8 +314,9 @@ function queueNextUp(title, song, callback) {
         })
 }
 
-function playTTS(title) {
+function playTTS(titleUF) {
 
+    var title = titleUF.substr(1, 40);
     st = _.sample(strings.introductions)
     var m = compoName + "," + st + " " + title;
     var request = new XMLHttpRequest();
