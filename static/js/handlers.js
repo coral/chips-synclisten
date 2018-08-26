@@ -272,7 +272,7 @@ function updateColors(c) {
 }
 
 function queueNextUp(titleUF, song, callback) {
-    var title = titleUF.substr(1, 60);
+    var title = titleUF;
     $('#nextentry-title').html("<b>NOW PLAYING:</b> " + title);
     var nextUp = anime.timeline();
     nextUp.add({
@@ -316,7 +316,7 @@ function queueNextUp(titleUF, song, callback) {
 
 function playTTS(titleUF) {
 
-    var title = titleUF.substr(1, 60);
+    var title = titleUF;
     st = _.sample(strings.introductions)
     var m = compoName + "," + st + " " + title;
     var request = new XMLHttpRequest();
